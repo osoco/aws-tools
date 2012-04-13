@@ -81,10 +81,12 @@ kept for backups older than '$KEEP_ONE_PER_DAY_DATE' but not older than '$DELETE
 Backups not older than '$KEEP_ONE_PER_DAY_DATE' won't be erased"
 
 create_or_append_to_var EC2_DESC_SNAPS_CMD "ec2-describe-snapshots --hide-tags"
+IFS=$' '
 for FILTER in $FILTERS ; do
     create_or_append_to_var EC2_DESC_SNAPS_CMD "-F '$FILTER'"
 done
 IFS=$'\n'
+echo "Executing $EC2_DESC_SNAPS_CMD..."
 for SNAP_DESC in `eval $EC2_DESC_SNAPS_CMD` ; do
     search_by_regexp SNAP_ID "$SNAP_DESC" '^snap-'
     search_by_regexp CREATION_DATE "$SNAP_DESC" "$DATE_REGEXP"
@@ -99,23 +101,20 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
     SNAP_DATE=`echo $SNAP_DESC | cut -d' ' -f1 | cut -d'T' -f1 | tr -d '-'`
     SNAP_ID=`echo $SNAP_DESC | cut -d' ' -f2`
     if [ "$SNAP_DATE" -lt "$DELETE_ALL_DATE" ] ; then
-        print "$SNAP_ID is older than $DELETE_ALL_DATE (it's date is $SNAP_DATE)... deleting"
+        print "$SNAP_ID - $SNAP_DATE - older than $DELETE_ALL_DATE - deleting..."
+    elif [ "$SNAP_DATE" -gt "$KEEP_ONE_PER_DAY_DATE" ] ; then
+        if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
+            print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
+            PREVIOUS_SNAP_DATE=""
+        fi
+        print "$SNAP_ID - $SNAP_DATE - newer than $KEEP_ONE_PER_DAY_DATE - keeping..."
     else
-        if [ "$SNAP_DATE" -ge "$DELETE_ALL_DATE" ] && 
-           [ "$SNAP_DATE" -lt "$KEEP_ONE_PER_DAY_DATE" ] ; then
-            if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
-                if [ "$PREVIOUS_SNAP_DATE" == "$SNAP_DATE" ]; then
-                    print "$PREVIOUS_SNAP_ID is not the last of its date ($SNAP_DATE)... deleting"
-                else
-                    print "$PREVIOUS_SNAP_ID is the last of its date ($SNAP_DATE)... keeping"
-                fi
+        if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
+            if [ "$PREVIOUS_SNAP_DATE" == "$SNAP_DATE" ]; then
+                print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - not the last of its date - deleting..."
+            else
+                print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
             fi
-        else
-            if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
-                print "$PREVIOUS_SNAP_ID is the last of its date ($PREVIOUS_SNAP_DATE)... keeping"
-                PREVIOUS_SNAP_DATE=""
-            fi
-            print "$SNAP_ID is not older enough ($SNAP_DATE)... keeping"
         fi
         PREVIOUS_SNAP_ID="$SNAP_ID"
         PREVIOUS_SNAP_DATE="$SNAP_DATE"
