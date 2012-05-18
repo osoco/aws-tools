@@ -102,6 +102,7 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
     SNAP_ID=`echo $SNAP_DESC | cut -d' ' -f2`
     if [ "$SNAP_DATE" -lt "$DELETE_ALL_DATE" ] ; then
         print "$SNAP_ID - $SNAP_DATE - older than $DELETE_ALL_DATE - deleting..."
+        ec2-delete-snapshot $SNAP_ID
     elif [ "$SNAP_DATE" -gt "$KEEP_ONE_PER_DAY_DATE" ] ; then
         if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
             print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
@@ -112,6 +113,7 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
         if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
             if [ "$PREVIOUS_SNAP_DATE" == "$SNAP_DATE" ]; then
                 print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - not the last of its date - deleting..."
+                ec2-delete-snapshot $SNAP_ID
             else
                 print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
             fi
