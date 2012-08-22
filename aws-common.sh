@@ -27,7 +27,7 @@ function print
 # print_error SOME_TEXT
 function print_error
 {
-    echo "$1" >&2
+    echo -e "$1" >&2
 }
 
 # usage USAGE_DESCRIPTION
@@ -58,6 +58,17 @@ function create_or_append_to_var
     export ${1}="$result"
 }
 
+# var_not_empty_or_fail BUCKET_NAME "The bucket can't be empty!"
+function var_not_empty_or_fail
+{
+    eval local VAR_VALUE=\$$1
+    if [ -z $"$VAR_VALUE" ] ; then
+        print_error "$2"
+        usage "$USAGE_DESCRIPTION"
+    fi
+}
+
+
 EC2_PARAMS_DESC="[ -K ec2_private_key ] [ -C ec2_cert ] [ -r ec2_region ]"
 EC2_PARAMS_OPTS="K:C:r:"
 
@@ -79,5 +90,3 @@ function parse_common_ec2_param
         ;;
     esac
 }
-
-
