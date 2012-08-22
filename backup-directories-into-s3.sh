@@ -64,14 +64,14 @@ while [[ ! -z "$1" ]]; do
     print "Backing up directory '$1'"
     if [[ -d "$1" ]]; then
         BACKUPED_FILE="$TMP_DIR/`basename $1`_`date +%F_%H-%M-%S`.tar.bz2"
-        BACKUP_PATH=`echo "$BACKUP_PATH" | sed -e 's/^[/]*//' | sed -e 's/[/]*$//'`
-        if [[ ! -z "$BACKUP_PATH" ]] ; then   
-            BACKUP_PATH="$BACKUP_PATH"'/'
+        CURRENT_BACKUP_PATH=`echo "$BACKUP_PATH" | sed -e 's/^[/]*//' | sed -e 's/[/]*$//'`
+        if [[ ! -z "$CURRENT_BACKUP_PATH" ]] ; then   
+            CURRENT_BACKUP_PATH="$CURRENT_BACKUP_PATH"'/'
         fi
         if [[ ! -z "$DIRECTORY_BY_BACKUP" ]]; then
-            BACKUP_PATH="$BACKUP_PATH`basename $1`/"
+            CURRENT_BACKUP_PATH="$CURRENT_BACKUP_PATH`basename $1`/"
         fi
-        S3_FILE="$BUCKET_PATH/$BACKUP_PATH`basename $BACKUPED_FILE`"
+        S3_FILE="$BUCKET_PATH/$CURRENT_BACKUP_PATH`basename $BACKUPED_FILE`"
         tar jcvf "$BACKUPED_FILE" "$1" && $S3CMD_PATH put "$BACKUPED_FILE" "$S3_FILE"
     else
         print_error "$1 doesn't exists, skipping..."
