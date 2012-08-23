@@ -72,7 +72,7 @@ while [[ ! -z "$1" ]]; do
             CURRENT_BACKUP_PATH="$CURRENT_BACKUP_PATH`basename $1`/"
         fi
         S3_FILE="$BUCKET_PATH/$CURRENT_BACKUP_PATH`basename $BACKUPED_FILE`"
-        tar jcvf "$BACKUPED_FILE" "$1" && $S3CMD_PATH put "$BACKUPED_FILE" "$S3_FILE"
+        tar jcvf "$BACKUPED_FILE" "$1" &> /dev/null && $S3CMD_PATH put "$BACKUPED_FILE" "$S3_FILE"
     else
         print_error "$1 doesn't exists, skipping..."
     fi
