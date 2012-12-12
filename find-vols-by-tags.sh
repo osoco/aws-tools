@@ -13,14 +13,14 @@ else
     exit 1
 fi
 
-USAGE_DESCRIPTION="Usage: `basename $0` -t <tag=tag_value> $EC2_PARAMS_DESC"
+USAGE_DESCRIPTION="Usage: `basename $0` -t <tag=tag_value> (-t <another_tag=another_tag_value>) $EC2_PARAMS_DESC"
 
 function parse_params
 {
     while getopts ":t:$EC2_PARAMS_OPTS" opt; do
         case $opt in
         t)
-            TAG="$OPTARG"
+            TAGS="$OPTARG $TAGS"
             ;;
         \?)
             print_error "Unknown option -$OPTARG"
@@ -34,13 +34,15 @@ function parse_params
 }
 
 parse_params $@
-if [ -z "$TAG" ] ; then
-    print_error "No tag provided"
+if [ -z "$TAGS" ] ; then
+    print_error "No tags provided"
     usage "$USAGE_DESCRIPTION"
 fi
-
-IFS=$'\n'
-for VOL_DESC in `ec2-describe-volumes -F tag:"$TAG" --hide-tags | grep ^VOLUME`; do
+IFS=$' '
+for TAG in $TAGS; do
+    TAG_STRING="-F tag:$TAG $TAG_STRING"
+done
+for VOL_DESC in `ec2-describe-volumes $TAG_STRING --hide-tags | grep ^VOLUME`; do
     search_by_regexp VOLUME_ID "$VOL_DESC" "^vol-"
     create_or_append_to_var VOLUMES_IDS "$VOLUME_ID"
 done
