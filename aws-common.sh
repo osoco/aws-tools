@@ -57,6 +57,22 @@ function create_or_append_to_var
     export ${1}="$result"
 }
 
+function missing_param {
+    echo "Missing mandatory parameter $1" >&2
+    usage
+    exit 1
+}
+
+function check_given_mandatory_params {
+	IFS=$' '
+	for PARAM in "$@" ; do
+		eval "PARAM_VALUE=\$$PARAM" 
+		if [ -z "$PARAM_VALUE" ] ; then
+			missing_param "$PARAM"
+		fi
+	done	
+}
+
 # var_not_empty_or_fail BUCKET_NAME "The bucket can't be empty!"
 function var_not_empty_or_fail
 {
