@@ -34,15 +34,19 @@ function parse_params
 }
 
 parse_params $@
+print_ec2_vars
+
 if [ -z "$TAGS" ] ; then
     print_error "No tags provided"
     usage "$USAGE_DESCRIPTION"
 fi
 IFS=$' '
 for TAG in $TAGS; do
-    TAG_STRING="-F tag:$TAG $TAG_STRING"
+    TAG_STRING="-F \"tag:$TAG\" $TAG_STRING"
 done
-for VOL_DESC in `ec2-describe-volumes $TAG_STRING --hide-tags | grep ^VOLUME`; do
+FIND_VOL_CMD="ec2-describe-volumes $TAG_STRING --hide-tags | grep ^VOLUME"
+execute VOL_DESCRIPTIONS "$FIND_VOL_CMD" 
+for VOL_DESC in $VOL_DESCRIPTIONS; do
     search_by_regexp VOLUME_ID "$VOL_DESC" "^vol-"
     create_or_append_to_var VOLUMES_IDS "$VOLUME_ID"
 done

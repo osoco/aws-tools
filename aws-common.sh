@@ -13,8 +13,7 @@ DATE_REGEXP='^20[0-9][0-9]-[0-1][0-9]-[0-3][0-9]T'
 function execute
 {
     echo "Executing: $2"
-    local result=$(eval $2)
-    export ${1}="$result"
+    export ${1}="$(eval $2)"
 }
 
 # print SOME_TEXT
@@ -68,6 +67,13 @@ function var_not_empty_or_fail
     fi
 }
 
+function print_ec2_vars
+{
+	for i in EC2_PRIVATE_KEY EC2_CERT EC2_URL ; do
+		VAR_VALUE="$(eval echo \$$i)"
+		echo "Using $i=$VAR_VALUE"
+	done
+}
 
 EC2_PARAMS_DESC="[ -K ec2_private_key ] [ -C ec2_cert ] [ -r ec2_region ]"
 EC2_PARAMS_OPTS="K:C:r:"

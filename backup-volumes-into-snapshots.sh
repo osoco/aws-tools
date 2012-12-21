@@ -31,6 +31,7 @@ function volumes_ids_or_exit
 function parse_params
 {
     while getopts ":v:t:d:s$EC2_PARAMS_OPTS" opt; do
+    	echo "$opt -> $OPTARG"
         case $opt in
         v)
             create_or_append_to_var VOLUMES_IDS "$OPTARG"
@@ -56,6 +57,7 @@ function parse_params
 }
 
 parse_params $@
+print_ec2_vars
 volumes_ids_or_exit
 
 IFS=$' '
