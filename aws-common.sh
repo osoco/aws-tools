@@ -19,8 +19,8 @@ function execute
 # print SOME_TEXT
 function print 
 {
-    echo "##################################################################"
-    echo "##### $1"
+	echo -en "\033[0;36m############################################################\n"
+	echo -en "##### $1""\033[0m \n"
 }
 
 # print_error SOME_TEXT
@@ -34,6 +34,17 @@ function usage
 {
     print_error "$1"
     exit 1
+}
+
+# check_for_runtime_value VARIABLE_TO_CHECK
+function check_for_runtime_value {
+	eval RUNTIME_VALUE="\$$1"
+	if [ -z "$RUNTIME_VALUE" ] ; then
+    	echo -en "Couldn't find a proper value for \033[1;31m$1\033[0m, exiting now...\n" >&2
+    	exit 1
+    else
+    	echo -en "Found \033[1;33m$RUNTIME_VALUE\033[0m as the value for $1 \n"
+   	fi
 }
 
 # search_by_regexp RESULT_VAR_NAME SOME_TEXT REGEXP_TO_SEARCH_IN_SOMETEXT
@@ -59,7 +70,7 @@ function create_or_append_to_var
 
 function missing_param {
     echo "Missing mandatory parameter $1" >&2
-    usage
+    usage "$USAGE_DESCRIPTION"
     exit 1
 }
 
