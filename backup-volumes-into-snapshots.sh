@@ -18,7 +18,14 @@ fi
 
 USAGE_DESCRIPTION="Usage: `basename $0` -v <volume_id> [ -v <another_volume_id> ] \
 [ -d <backup_description_with_dashes_instead_spaces> ] \
-[ -t <backup_tag=backup_tag_value> ] [ -t <backup_tag=backup_tag_value> ] $EC2_PARAMS_DESC"
+[ -t <backup_tag=backup_tag_value> ] [ -t <backup_tag=backup_tag_value> ] (-v) (-c) $EC2_PARAMS_DESC
+Options:
+	-v VOLUME_ID a volume id to backup. You can pass this option multiple times
+	-d DESCRIPTION the backup description. Due to getopts restrictions, must use dashes instead spaces (the dashes will be substituted by spaces for AWS)
+	-t KEY=VALUE a tag consisting of a pair of key and value that will be used to tag the created snapshot  
+	-s If passed, the script will be synchronous (i.e won't finish until the snapshot is completed)
+	-c If passed, the volume tags will be copied to the snapshot
+"
 
 function volumes_ids_or_exit
 {
@@ -30,7 +37,7 @@ function volumes_ids_or_exit
 
 function parse_params
 {
-    while getopts ":v:t:d:s$EC2_PARAMS_OPTS" opt; do
+    while getopts ":v:t:d:sc$EC2_PARAMS_OPTS" opt; do
     	echo "$opt -> $OPTARG"
         case $opt in
         v)
@@ -45,6 +52,9 @@ function parse_params
         s)
             SYNC="yes"
             ;;
+        c)
+        	COPY_TAGS="yes"
+        	;;
         \?)
             print_error "Unknown option -$OPTARG"
             usage "$USAGE_DESCRIPTION"
@@ -57,6 +67,7 @@ function parse_params
 }
 
 parse_params $@
+check_given_mandatory_params $VOLUME_IDS
 print_ec2_vars
 volumes_ids_or_exit
 
@@ -69,33 +80,32 @@ for VOLUME_ID in $VOLUMES_IDS ; do
     fi
     create_or_append_to_var CREATE_SNAP_CMD "$VOLUME_ID"
     execute SNAPSHOT_CREATION_OUTPUT "$CREATE_SNAP_CMD"
+    check_for_runtime_value SNAPSHOT_CREATION_OUTPUT
     search_by_regexp SNAPSHOT_ID "$SNAPSHOT_CREATION_OUTPUT" "^snap-"
-    if [ -z "$SNAPSHOT_ID" ] ; then
-        print_error "Failed to obtain a snapshot for volume $VOLUME_ID. Obtained output $SNAPSHOT_CREATION_OUTPUT"
-    else
-        if [ ! -z "$TAGS" ] ; then
-            IFS=$' '
-            for TAG in $TAGS ; do
-                TAG_SNAP_CMD=''
-                print "Tagging snapshot '$SNAPSHOT_ID' with tag $TAG"
-                create_or_append_to_var TAG_SNAP_CMD "ec2-create-tags"
-                create_or_append_to_var TAG_SNAP_CMD "$SNAPSHOT_ID"
-                create_or_append_to_var TAG_SNAP_CMD "-t $TAG"
-                execute TAG_SNAP_OUTPUT "$TAG_SNAP_CMD"
-            done
-        fi 
-        if [ ! -z "$SYNC" ] ; then
-            print "Waiting for snapshot $SNAPSHOT_ID to be completed..."
-            while [ -z "$COMPLETED" ]; do
-                sleep 15
-                execute COMPLETED 'ec2-describe-snapshots --hide-tags -F status=completed "'"$SNAPSHOT_ID"'"'
-            done
-            print "Snapshot $SNAPSHOT_ID has been completed: $COMPLETED"
-        fi
-        print "Backed up vol '$VOLUME_ID' in snapshot '$SNAPSHOT_ID'"
+    check_for_runtime_value SNAPSHOT_ID
+    if [ ! -z "$TAGS" ] ; then
+        IFS=$' '
+        for TAG in $TAGS ; do
+            TAG_SNAP_CMD=''
+            print "Tagging snapshot '$SNAPSHOT_ID' with tag $TAG"
+            create_or_append_to_var TAG_SNAP_CMD "ec2-create-tags"
+            create_or_append_to_var TAG_SNAP_CMD "$SNAPSHOT_ID"
+            create_or_append_to_var TAG_SNAP_CMD "-t $TAG"
+            execute TAG_SNAP_OUTPUT "$TAG_SNAP_CMD"
+        done
     fi
+    if [ ! -z "$COPY_TAGS" ] ; then
+    	COPY_TAGS_CMD="`dirname $0`/copy-tags.sh -o $VOLUME_ID -n $SNAPSHOT_ID"
+    	echo "Executing '$COPY_TAGS_CMD'"
+    	eval $COPY_TAGS_CMD
+    fi
+    if [ ! -z "$SYNC" ] ; then
+        print "Waiting for snapshot $SNAPSHOT_ID to be completed..."
+        while [ -z "$COMPLETED" ]; do
+            sleep 15
+            execute COMPLETED 'ec2-describe-snapshots --hide-tags -F status=completed "'"$SNAPSHOT_ID"'"'
+        done
+        print "Snapshot $SNAPSHOT_ID has been completed: $COMPLETED"
+    fi
+    print "Backed up vol '$VOLUME_ID' in snapshot '$SNAPSHOT_ID'"
 done
-
-
-
-
