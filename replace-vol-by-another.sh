@@ -1,3 +1,17 @@
+#  Copyright 2013 Orange Software S.L. (OSOCO)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 #!/bin/bash
 # Find one or more volumes using a given tag or tag and value
 # Depends on:
@@ -37,7 +51,7 @@ function parse_params
             usage "$USAGE_DESCRIPTION"
             ;;
         *)
-            parse_common_ec2_param "$opt" "$OPTARG" 
+            parse_common_ec2_param "$opt" "$OPTARG"
             ;;
         esac
     done
@@ -78,11 +92,11 @@ while [ -z "$VOL_AVAILABLE_STATUS" ] ; do
 	sleep 5
 done
 
-print "Creating new volume"	
+print "Creating new volume"
 CREATE_VOL_CMD="ec2-create-volume --snapshot $SNAPSHOT_ID --size $VOL_SIZE \
 	--availability-zone $VOL_ZONE --type $VOL_TYPE"
 execute CREATE_VOLUME_OUTPUT "$CREATE_VOL_CMD"
-check_for_runtime_value "CREATE_VOLUME_OUTPUT" 
+check_for_runtime_value "CREATE_VOLUME_OUTPUT"
 search_by_regexp CREATED_VOLUME "$CREATE_VOLUME_OUTPUT" "^vol-"
 check_for_runtime_value "CREATED_VOLUME"
 
@@ -105,7 +119,7 @@ ATTACH_VOL_CMD="ec2-attach-volume --instance $VOL_INSTANCE_ID \
 	--device $VOL_MOUNT_POINT $CREATED_VOLUME"
 execute ATTACH_VOL_CMD_OUTPUT "$ATTACH_VOL_CMD"
 check_for_runtime_value "ATTACH_VOL_CMD_OUTPUT"
-	
+
 print "Waiting for new volume $CREATED_VOLUME to be attached"
 DESC_VOL_CMD="ec2-describe-volumes $CREATED_VOLUME | grep ^ATTACHMENT"
 while [ -z "$VOL_ATTACHED_STATUS" ] ; do

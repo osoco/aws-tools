@@ -1,3 +1,17 @@
+#  Copyright 2013 Orange Software S.L. (OSOCO)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 #!/bin/bash
 # Clean old snapshots that match one or more given tags. It will keep all backups that
 # aren't older than a given amount of days, a backup per day for all backups that aren't
@@ -19,7 +33,7 @@ fi
 USAGE_DESCRIPTION="Usage: `basename $0` [ -f <snapshot_filter> ] \
 [ -f <another_snapshot_filter ] -a <keep_all_backups_that_are_not_older_than_this_days> \
 -d <one_per_day_days:delete_all_days> $EC2_PARAMS_DESC
-Note that: 
+Note that:
   - F: Snapshot filters can be any accepted filters by command ec2-describe-snapshots
 (http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference/ApiReference-cmd-DescribeSnapshots.html)
   - d <x:y>: Backups older than y days will be deleted, backups older than x days but not
@@ -42,7 +56,7 @@ function parse_params
             usage "$USAGE_DESCRIPTION"
             ;;
         *)
-            parse_common_ec2_param "$opt" "$OPTARG" 
+            parse_common_ec2_param "$opt" "$OPTARG"
             ;;
         esac
     done
@@ -122,4 +136,3 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
         PREVIOUS_SNAP_DATE="$SNAP_DATE"
     fi
 done
-

@@ -1,3 +1,17 @@
+#  Copyright 2013 Orange Software S.L. (OSOCO)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 #!/bin/bash
 # Find one or more volumes using a given tag or tag and value
 # Depends on:
@@ -27,7 +41,7 @@ function parse_params
             usage "$USAGE_DESCRIPTION"
             ;;
         *)
-            parse_common_ec2_param "$opt" "$OPTARG" 
+            parse_common_ec2_param "$opt" "$OPTARG"
             ;;
         esac
     done
@@ -51,8 +65,8 @@ parse_params $@
 if [ -z "$REGION" ] ; then
     print_error "No region provided. All regions will be used"
     IFS=$'\n'
-    for region in `ec2-describe-regions | awk '{print $2}'` ; do 
-        create_or_append_to_var REGIONS "$region" 
+    for region in `ec2-describe-regions | awk '{print $2}'` ; do
+        create_or_append_to_var REGIONS "$region"
     done
 else
     REGIONS="$REGION"
@@ -63,9 +77,9 @@ for region in $REGIONS ; do
     IFS=$'\n'
     for instance_line in `ec2-describe-instances --region "$region"`; do
         line_type=`echo "$instance_line" | cut -f1`
-        case "$line_type" in 
+        case "$line_type" in
         RESERVATION)
-            if [ ! -z "$INSTANCE_ID" ] ; then 
+            if [ ! -z "$INSTANCE_ID" ] ; then
                 print_current_instance_info
                 clean_instance_info
             fi

@@ -1,3 +1,17 @@
+#  Copyright 2013 Orange Software S.L. (OSOCO)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 #!/bin/bash
 # Backup a given volume or volumes by making an snapshot. Supports snapshot description
 # and multiple tagging. By default is asynchronous, but can be configured to wait until
@@ -22,7 +36,7 @@ USAGE_DESCRIPTION="Usage: `basename $0` -v <volume_id> [ -v <another_volume_id> 
 Options:
 	-v VOLUME_ID a volume id to backup. You can pass this option multiple times
 	-d DESCRIPTION the backup description. Due to getopts restrictions, must use dashes instead spaces (the dashes will be substituted by spaces for AWS)
-	-t KEY=VALUE a tag consisting of a pair of key and value that will be used to tag the created snapshot  
+	-t KEY=VALUE a tag consisting of a pair of key and value that will be used to tag the created snapshot
 	-s If passed, the script will be synchronous (i.e won't finish until the snapshot is completed)
 	-c If passed, the volume tags will be copied to the snapshot
 "
@@ -60,7 +74,7 @@ function parse_params
             usage "$USAGE_DESCRIPTION"
             ;;
         *)
-            parse_common_ec2_param "$opt" "$OPTARG" 
+            parse_common_ec2_param "$opt" "$OPTARG"
             ;;
         esac
     done

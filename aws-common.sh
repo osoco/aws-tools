@@ -1,3 +1,17 @@
+#  Copyright 2013 Orange Software S.L. (OSOCO)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 # Common utility EC2 functions. Meant to be sourced by other scripts
 # Depends on:
 # - ec2-api-tools
@@ -17,7 +31,7 @@ function execute
 }
 
 # print SOME_TEXT
-function print 
+function print
 {
 	echo -en "\033[0;36m############################################################\n"
 	echo -en "##### $1""\033[0m \n"
@@ -77,11 +91,11 @@ function missing_param {
 function check_given_mandatory_params {
 	IFS=$' '
 	for PARAM in "$@" ; do
-		eval "PARAM_VALUE=\$$PARAM" 
+		eval "PARAM_VALUE=\$$PARAM"
 		if [ -z "$PARAM_VALUE" ] ; then
 			missing_param "$PARAM"
 		fi
-	done	
+	done
 }
 
 # var_not_empty_or_fail BUCKET_NAME "The bucket can't be empty!"
@@ -105,7 +119,7 @@ function print_ec2_vars
 EC2_PARAMS_DESC="[ -K ec2_private_key ] [ -C ec2_cert ] [ -r ec2_region ]"
 EC2_PARAMS_OPTS="K:C:r:"
 
-# parse_common_ec2_params SOME_PARAM SOME_VALUE 
+# parse_common_ec2_params SOME_PARAM SOME_VALUE
 function parse_common_ec2_param
 {
     case $1 in
