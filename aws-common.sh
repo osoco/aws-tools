@@ -131,7 +131,6 @@ function parse_common_ec2_param
         export EC2_SECRET="$OPTARG"
         ;;
     r)
-#        export EC2_URL="https://ec2.$OPTARG.amazonaws.com"
 	export EC2_URL="$OPTARG"
         ;;
     *)
