@@ -80,6 +80,7 @@ function create_or_append_to_var
         local result="$CURRENT_VAR_VALUE""$SEPARATOR""$2"
     fi
     export ${1}="$result"
+   echo $result
 }
 
 function missing_param {
@@ -110,27 +111,27 @@ function var_not_empty_or_fail
 
 function print_ec2_vars
 {
-	for i in EC2_PRIVATE_KEY EC2_CERT EC2_URL ; do
+	for i in EC2_ACCESS_ID EC2_SECRET EC2_URL ; do
 		VAR_VALUE="$(eval echo \$$i)"
 		echo "Using $i=$VAR_VALUE"
 	done
 }
 
-EC2_PARAMS_DESC="[ -K ec2_private_key ] [ -C ec2_cert ] [ -r ec2_region ]"
-EC2_PARAMS_OPTS="K:C:r:"
+EC2_PARAMS_DESC="[ -O ec2_access_id ] [ -W ec2_secret ] [ -r ec2_region ]"
+EC2_PARAMS_OPTS="O:W:r:"
 
 # parse_common_ec2_params SOME_PARAM SOME_VALUE
 function parse_common_ec2_param
 {
     case $1 in
-    K)
-        export EC2_PRIVATE_KEY="$OPTARG"
+    O)
+        export EC2_ACCESS_ID="$OPTARG"
         ;;
-    C)
-        export EC2_CERT="$OPTARG"
+    W)
+        export EC2_SECRET="$OPTARG"
         ;;
     r)
-        export EC2_URL="https://ec2.$OPTARG.amazonaws.com"
+	export EC2_URL="$OPTARG"
         ;;
     *)
         return 1
