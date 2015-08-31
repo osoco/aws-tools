@@ -26,7 +26,7 @@ DATE_REGEXP='^20[0-9][0-9]-[0-1][0-9]-[0-3][0-9]T'
 
 function execute
 {
-    echo "Executing: $2"
+    echo "Executing: $2" >&2
     export ${1}="$(eval $2)"
 }
 
@@ -112,25 +112,25 @@ function print_ec2_vars
 {
 	for i in EC2_PRIVATE_KEY EC2_CERT EC2_URL ; do
 		VAR_VALUE="$(eval echo \$$i)"
-		echo "Using $i=$VAR_VALUE"
+		echo "Using $i=$VAR_VALUE" >&2
 	done
 }
 
-EC2_PARAMS_DESC="[ -K ec2_private_key ] [ -C ec2_cert ] [ -r ec2_region ]"
-EC2_PARAMS_OPTS="K:C:r:"
+EC2_PARAMS_DESC="[ -O aws_access_key ] [ -W aws_secret_key ] [ -U URL ]"
+EC2_PARAMS_OPTS="O:W:U:"
 
 # parse_common_ec2_params SOME_PARAM SOME_VALUE
 function parse_common_ec2_param
 {
     case $1 in
-    K)
-        export EC2_PRIVATE_KEY="$OPTARG"
+    O)
+        export AWS_ACCESS_KEY="$OPTARG"
         ;;
-    C)
-        export EC2_CERT="$OPTARG"
+    W)
+        export AWS_SECRET_KEY="$OPTARG"
         ;;
-    r)
-        export EC2_URL="https://ec2.$OPTARG.amazonaws.com"
+    U)
+        export EC2_URL="$OPTARG"
         ;;
     *)
         return 1
